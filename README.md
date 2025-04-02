@@ -1,7 +1,7 @@
 ### team-haidi-project
 ---
 +팀명 및 팀원
-#Team: Haidi
+#Team Name : Haidi
 |팀원|역할|
 |------|---|
 |김태훈|Project lead, 프로젝트의 통괄 관리 및 책임자.|
