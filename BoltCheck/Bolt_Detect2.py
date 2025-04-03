@@ -28,7 +28,7 @@ def process_output(boxes_output, labels_output, frame_shape):
 
     for i in range(boxes_output.shape[1]):
         conf = boxes_output[0, i, 4]
-        if conf > 0.4:
+        if conf > 0.5:
             # 1. 좌표 클리핑 (모델 입력 크기 내로 제한)
             x1 = max(0, min(boxes_output[0, i, 0], W-1))
             y1 = max(0, min(boxes_output[0, i, 1], H-1))
