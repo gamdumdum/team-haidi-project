@@ -59,9 +59,6 @@ cap = cv2.VideoCapture(4)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
-box = cv2.imread('./crop.jpg')
-th, tx = box.shape[:2]
-
 # 라벨 매핑 (model_info에서 확인) 
 LABEL_NAMES = {0: "CRACK"}
 COLORS = {0: (0, 255, 0)}
@@ -73,7 +70,7 @@ try:
             break
 
         # Define the ROI coordinates
-        x1, y1, x2, y2 = 480, 250, 840, 700
+        x1, y1, x2, y2 = 560, 390, 720, 540
 
         # Crop the frame to the ROI
         roi = frame[y1:y2, x1:x2]
