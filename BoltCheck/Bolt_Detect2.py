@@ -6,7 +6,7 @@ from pathlib import Path
 
 core = ov.Core()
 # 테스트시 경로 수정 필요
-model = core.read_model("./model/model.xml", weights="./model/model.bin")
+model = core.read_model("./model/crack/model.xml", weights="./model/crack/model.bin")
 
 input_layer = model.input(0)
 input_shape = input_layer.partial_shape
