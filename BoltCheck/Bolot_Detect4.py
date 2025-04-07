@@ -15,22 +15,22 @@ from module import drawCrackBox as dC
 core = ov.Core()
 
 # 볼트 모델 로드 [ 경로 확인 ]
-bolt_model = core.read_model("./BoltCheck/model/Bolt/model.xml", weights="./BoltCheck/model/Bolt/model.bin")
+bolt_model = core.read_model("./model/Bolt/model.xml", weights="./model/Bolt/model.bin")
 
 input_layer = bolt_model.input(0)
 input_shape = input_layer.partial_shape
 if input_shape.is_dynamic:
     input_shape[0] = 1  # Batch size
     input_shape[1] = 3  # Channels
-    input_shape[2] = 736  # Height (모델 정보 참조)
-    input_shape[3] = 992  # Width (모델 정보 참조)
+    input_shape[2] = 416  # Height (모델 정보 참조)
+    input_shape[3] = 416  # Width (모델 정보 참조)
     bolt_model.reshape({input_layer: input_shape})
 
 bolt_compiled = core.compile_model(model=bolt_model, device_name="GPU.1") # 외장 그래픽 카드
 N_bolt, C_bolt, H_bolt, W_bolt = bolt_compiled.input(0).shape
 
 # 크랙 모델 로드 [ 경로 확인 ]
-crack_model = core.read_model("./BoltCheck/model/crack/model.xml", weights="./BoltCheck/model/crack/model.bin") 
+crack_model = core.read_model("./model/Crack/model_test.xml", weights="./model/Crack/model_test.bin") 
 
 input_layer2 = crack_model.input(0)
 input_shape2 = input_layer2.partial_shape
@@ -51,6 +51,10 @@ D_bolt = dB.drawBoltBox()
 # 크랙박스 그리기
 D_crack = dC.drawCrackBox()
 
+# 결함 
+Defect_Visual = DefectVisual.DefectVisualizer()
+Defect_Chart = dV.RealTimeDefectVisualizer()
+
 # 카메라 설정 (2개 카메라)
 cap1 = cv2.VideoCapture(4)  # 첫 번째 카메라
 cap2 = cv2.VideoCapture(10)  # 두 번째 카메라 (디바이스 번호는 시스템에 맞게 조정)
@@ -62,16 +66,19 @@ for cap in [cap1, cap2]:
 
 # 라벨 및 색상 설정
 LABEL_NAMES = {
+    "bolt": {1: "Bolt_OK", 0: "Bolt_NG"},
     "bolt": {0: "Bolt_OK", 1: "Bolt_NG"},
     "crack": {0: "Crack"}
 }
 
 COLORS = {
+    "bolt": {1: (0, 255, 0), 0: (0, 0, 255)},   # 볼트: 빨강/녹색
     "bolt": {0: (0, 255, 0), 1: (0, 0, 255)},   # 볼트: 녹색/빨강
     "crack": {0: (255, 255, 0)}                 # 크랙: 파랑/분홍
 }
 
 try:
+    frame_count = 0
     while True:
         # 두 카메라에서 프레임 읽기
         ret1, frame1 = cap1.read()
@@ -89,13 +96,13 @@ try:
         roi2 = frame2[ry1:ry2, rx1:rx2] # 2번 카메라
 
         # 공통 전처리 1번 카메라
-        resized1 = cv2.resize(roi1, (992, 736)) 
+        resized1 = cv2.resize(roi1, (416, 416)) 
         resized2 = cv2.resize(roi1, (416, 416)) 
         input_tensor1 = np.expand_dims(resized1.transpose(2, 0, 1), 0).astype(np.float32)
         input_tensor2 = np.expand_dims(resized2.transpose(2, 0, 1), 0).astype(np.float32)
 
         # 공통 전처리 2번 카메라
-        resized3 = cv2.resize(roi2, (992, 736)) 
+        resized3 = cv2.resize(roi2, (416, 416)) 
         resized4 = cv2.resize(roi2, (416, 416)) 
         input_tensor3 = np.expand_dims(resized3.transpose(2, 0, 1), 0).astype(np.float32)
         input_tensor4 = np.expand_dims(resized4.transpose(2, 0, 1), 0).astype(np.float32)
@@ -162,6 +169,11 @@ try:
             # 화면에 표시
             cv2.imshow("Camera 2 Detection", frame2)
 
+        # 주기적으로 차트 업데이트
+        if frame_count % 20 == 0:  # 20프레임마다 업데이트
+            Defect_Chart.update_chart()
+        
+        frame_count += 1
         if cv2.waitKey(1) == ord('q'):
             break
         
@@ -169,4 +181,13 @@ try:
 finally:
     cap1.release()
     cap2.release()
+
+    Defect_Chart.close()
     cv2.destroyAllWindows()
+    # 일자 데이터 시각화
+    Defect_Visual.visualize_defect_counts_by_date("2025-04-01", "2025-04-04") 
+    # 주별 데이터
+    #DefectVisualizer.visualize_defect_counts_by_date(group_by='weekly')
+    # 월별 데이터
+    #DefectVisualizer.visualize_defect_counts_by_date(group_by='monthly')
+

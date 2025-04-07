@@ -1,9 +1,14 @@
 
+# 
+#  DrawCrackBox 그려주는 함수 입니다.
+#
+
 import cv2
 import os
-import openvino as ov
+import openvino as ovs
 from pathlib import Path
 import datetime as dt
+import sqlite3
 
 # 라벨 및 색상 설정
 LABEL_NAMES = {
@@ -42,6 +47,9 @@ class drawCrackBox:
                         (x1, y1-30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
             if label == 0: crack_count += 1
 
+            # 크랙 레벨
+            crack_level = 1
+
             if conf > 0.5: # 신뢰도 0.5 이상
                 # 'c' 키를 누르면 현재 프레임을 이미지로 저장
                 if cv2.waitKey(1)  == ord('c'):
@@ -57,6 +65,49 @@ class drawCrackBox:
                     # 이미지 저장
                     cv2.imwrite(filename, frame) 
                     print(f"Saved: {filename} (Class: {LABEL_NAMES['crack'][label]}, Confidence: {conf:.2f})")
+
+                    # SQLite3 데이터베이스에 저장
+                    try:
+                        # 데이터베이스 연결
+                        conn = sqlite3.connect('bolt.db3')
+                        cursor = conn.cursor()
+                        
+                        # 테이블 생성 (없을 경우)
+                        cursor.execute('''
+                        CREATE TABLE IF NOT EXISTS defectsDB (
+                            ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                            NAME TEXT NOT NULL,
+                            Defect TEXT NOT NULL,
+                            DefectLevel TEXT NOT NULL,
+                            DefectDate TEXT NOT NULL,
+                            FilePath TEXT NOT NULL,
+                            Confidence REAL NOT NULL,
+                            DetectionTime TEXT NOT NULL
+                        )
+                        ''')
+                        
+                        # 데이터 삽입
+                        cursor.execute('''
+                        INSERT INTO defectsDB (NAME, Defect, DefectLevel, DefectDate, FilePath, Confidence, DetectionTime)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                        ''', (
+                            LABEL_NAMES['crack'][label],    # NAME
+                            LABEL_NAMES['crack'][label],    # DefectType (여기서는 NAME과 동일하게 설정)
+                            crack_level,                    # 크랙 레벨
+                            dDay,                           # DefectDate (YYYY-MM-DD)
+                            filename,                       # FilePath
+                            float(conf),                    # Confidence
+                            dTime                           # DetectionTime (HH:MM:SS)
+                        ))
+                        
+                        conn.commit()
+                        print("Data 저장 완료.")
+                        
+                    except sqlite3.Error as e:
+                        print(f"Database error: {e}")
+                    finally:
+                        if conn:
+                            conn.close()
 
         return crack_count
 
