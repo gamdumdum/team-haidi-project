@@ -31,6 +31,7 @@ class drawBoltBox:
         dDay = dt.datetime.now().strftime("%Y-%m-%d")
         dTime = dt.datetime.now().strftime("%H:%M:%S")
         bolt_count = 0
+
         for box in bolt_boxes1:
             x1, y1, x2, y2, conf, label = box
 
@@ -41,7 +42,6 @@ class drawBoltBox:
             y2 += ry
 
             color = COLORS["bolt"].get(label, (0, 255, 255))
-
             cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
             cv2.putText(frame, f"{LABEL_NAMES['bolt'][label]} {conf:.2f}", 
                         (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
@@ -109,11 +109,6 @@ class drawBoltBox:
                     finally:
                         if conn:
                             conn.close()
-
-            cv2.rectangle(frame1, (x1, y1), (x2, y2), color, 2)
-            cv2.putText(frame1, f"{LABEL_NAMES['bolt'][label]} {conf:.2f}", 
-                        (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-            if label == 0: bolt_count += 1
 
         return bolt_count
 

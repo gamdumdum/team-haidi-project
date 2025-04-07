@@ -10,6 +10,9 @@ import datetime as dt
 from module import processOutput as pO
 from module import drawBoltBox as dB 
 from module import drawCrackBox as dC
+from module import DefectCounter as DefectCount
+from module import RealTimeDefectVisualizer as dV
+from module import DeftectVisualizer as DefectVisual
 
 # Initialize OpenVINO
 core = ov.Core()
@@ -50,6 +53,9 @@ P_output = pO.processOutput()
 D_bolt = dB.drawBoltBox()
 # 크랙박스 그리기
 D_crack = dC.drawCrackBox()
+# 결함 
+Defect_Visual = DefectVisual.DefectVisualizer()
+Defect_Chart = dV.RealTimeDefectVisualizer()
 
 # 결함 
 Defect_Visual = DefectVisual.DefectVisualizer()
@@ -67,13 +73,11 @@ for cap in [cap1, cap2]:
 # 라벨 및 색상 설정
 LABEL_NAMES = {
     "bolt": {1: "Bolt_OK", 0: "Bolt_NG"},
-    "bolt": {0: "Bolt_OK", 1: "Bolt_NG"},
     "crack": {0: "Crack"}
 }
 
 COLORS = {
     "bolt": {1: (0, 255, 0), 0: (0, 0, 255)},   # 볼트: 빨강/녹색
-    "bolt": {0: (0, 255, 0), 1: (0, 0, 255)},   # 볼트: 녹색/빨강
     "crack": {0: (255, 255, 0)}                 # 크랙: 파랑/분홍
 }
 
