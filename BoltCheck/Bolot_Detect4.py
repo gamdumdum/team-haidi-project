@@ -57,6 +57,10 @@ D_crack = dC.drawCrackBox()
 Defect_Visual = DefectVisual.DefectVisualizer()
 Defect_Chart = dV.RealTimeDefectVisualizer()
 
+# 결함 
+Defect_Visual = DefectVisual.DefectVisualizer()
+Defect_Chart = dV.RealTimeDefectVisualizer()
+
 # 카메라 설정 (2개 카메라)
 cap1 = cv2.VideoCapture(4)  # 첫 번째 카메라
 cap2 = cv2.VideoCapture(10)  # 두 번째 카메라 (디바이스 번호는 시스템에 맞게 조정)
@@ -174,7 +178,6 @@ try:
             Defect_Chart.update_chart()
         
         frame_count += 1
-        
         if cv2.waitKey(1) == ord('q'):
             break
         
@@ -191,3 +194,4 @@ finally:
     #DefectVisualizer.visualize_defect_counts_by_date(group_by='weekly')
     # 월별 데이터
     #DefectVisualizer.visualize_defect_counts_by_date(group_by='monthly')
+

@@ -1,11 +1,14 @@
 
+# 
+#  DrawCrackBox 그려주는 함수 입니다.
+#
+
 import cv2
 import os
-import openvino as ov
+import openvino as ovs
 from pathlib import Path
 import datetime as dt
 import sqlite3
-
 
 # 라벨 및 색상 설정
 LABEL_NAMES = {
@@ -46,6 +49,7 @@ class drawCrackBox:
 
             # 크랙 레벨
             crack_level = 1
+
             if conf > 0.5: # 신뢰도 0.5 이상
                 # 'c' 키를 누르면 현재 프레임을 이미지로 저장
                 if cv2.waitKey(1)  == ord('c'):
