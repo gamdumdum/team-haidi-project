@@ -1,3 +1,4 @@
+
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('TkAgg')  # Tkinter 백엔드 사용
