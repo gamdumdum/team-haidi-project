@@ -1,4 +1,8 @@
 
+# 볼트 및 크랙 검출 
+# 2025.04.02 수요일
+# 작성자 : 윤태검
+
 import cv2
 import numpy as np
 import openvino as ov

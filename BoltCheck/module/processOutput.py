@@ -9,6 +9,7 @@ class processOutput:
             conf = boxes_output[0, i, 4]
 
             if conf > 0.6:
+
                 # 좌표 클리핑 및 스케일링
                 x1 = max(0, min(boxes_output[0, i, 0], W_model-1))
                 y1 = max(0, min(boxes_output[0, i, 1], H_model-1))

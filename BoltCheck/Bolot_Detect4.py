@@ -10,17 +10,12 @@ import datetime as dt
 from module import processOutput as pO
 from module import drawBoltBox as dB 
 from module import drawCrackBox as dC
-from module import DefectCounter as DefectCount
-from module import RealTimeDefectVisualizer as dV
-from module import DeftectVisualizer as DefectVisual
-
 
 # Initialize OpenVINO
 core = ov.Core()
 
 # 볼트 모델 로드 [ 경로 확인 ]
 bolt_model = core.read_model("./model/Bolt/model.xml", weights="./model/Bolt/model.bin")
-
 
 input_layer = bolt_model.input(0)
 input_shape = input_layer.partial_shape
@@ -59,7 +54,6 @@ D_crack = dC.drawCrackBox()
 # 결함 
 Defect_Visual = DefectVisual.DefectVisualizer()
 Defect_Chart = dV.RealTimeDefectVisualizer()
-
 
 # 카메라 설정 (2개 카메라)
 cap1 = cv2.VideoCapture(4)  # 첫 번째 카메라
@@ -102,7 +96,6 @@ try:
         roi2 = frame2[ry1:ry2, rx1:rx2] # 2번 카메라
 
         # 공통 전처리 1번 카메라
-
         resized1 = cv2.resize(roi1, (416, 416)) 
         resized2 = cv2.resize(roi1, (416, 416)) 
         input_tensor1 = np.expand_dims(resized1.transpose(2, 0, 1), 0).astype(np.float32)
@@ -188,6 +181,7 @@ try:
 finally:
     cap1.release()
     cap2.release()
+
     Defect_Chart.close()
     cv2.destroyAllWindows()
     # 일자 데이터 시각화
@@ -196,6 +190,4 @@ finally:
     #DefectVisualizer.visualize_defect_counts_by_date(group_by='weekly')
     # 월별 데이터
     #DefectVisualizer.visualize_defect_counts_by_date(group_by='monthly')
-
-    cv2.destroyAllWindows()
 

@@ -31,7 +31,6 @@ class drawBoltBox:
         dDay = dt.datetime.now().strftime("%Y-%m-%d")
         dTime = dt.datetime.now().strftime("%H:%M:%S")
         bolt_count = 0
-
         for box in bolt_boxes1:
             x1, y1, x2, y2, conf, label = box
 
