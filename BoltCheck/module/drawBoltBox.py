@@ -1,3 +1,4 @@
+
 # 
 #  DrawBoltBox 그려주는 함수 입니다.
 #
@@ -11,7 +12,7 @@ import sqlite3
 
 # 라벨 및 색상 설정
 LABEL_NAMES = {
-    "bolt": {1: "Bolt_OK", 0: "Bolt_NG"},
+    "bolt": {0: "Bolt_OK", 1: "Bolt_NG"},
     "crack": {0: "Crack"}
 }
 
@@ -41,6 +42,7 @@ class drawBoltBox:
             y2 += ry
 
             color = COLORS["bolt"].get(label, (0, 255, 255))
+
             cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
             cv2.putText(frame, f"{LABEL_NAMES['bolt'][label]} {conf:.2f}", 
                         (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
@@ -109,6 +111,10 @@ class drawBoltBox:
                         if conn:
                             conn.close()
 
+            cv2.rectangle(frame1, (x1, y1), (x2, y2), color, 2)
+            cv2.putText(frame1, f"{LABEL_NAMES['bolt'][label]} {conf:.2f}", 
+                        (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+            if label == 0: bolt_count += 1
 
         return bolt_count
 

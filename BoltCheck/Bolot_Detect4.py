@@ -14,11 +14,13 @@ from module import DefectCounter as DefectCount
 from module import RealTimeDefectVisualizer as dV
 from module import DeftectVisualizer as DefectVisual
 
+
 # Initialize OpenVINO
 core = ov.Core()
 
 # 볼트 모델 로드 [ 경로 확인 ]
 bolt_model = core.read_model("./model/Bolt/model.xml", weights="./model/Bolt/model.bin")
+
 
 input_layer = bolt_model.input(0)
 input_shape = input_layer.partial_shape
@@ -53,9 +55,11 @@ P_output = pO.processOutput()
 D_bolt = dB.drawBoltBox()
 # 크랙박스 그리기
 D_crack = dC.drawCrackBox()
+
 # 결함 
 Defect_Visual = DefectVisual.DefectVisualizer()
 Defect_Chart = dV.RealTimeDefectVisualizer()
+
 
 # 카메라 설정 (2개 카메라)
 cap1 = cv2.VideoCapture(4)  # 첫 번째 카메라
@@ -69,11 +73,13 @@ for cap in [cap1, cap2]:
 # 라벨 및 색상 설정
 LABEL_NAMES = {
     "bolt": {1: "Bolt_OK", 0: "Bolt_NG"},
+    "bolt": {0: "Bolt_OK", 1: "Bolt_NG"},
     "crack": {0: "Crack"}
 }
 
 COLORS = {
     "bolt": {1: (0, 255, 0), 0: (0, 0, 255)},   # 볼트: 빨강/녹색
+    "bolt": {0: (0, 255, 0), 1: (0, 0, 255)},   # 볼트: 녹색/빨강
     "crack": {0: (255, 255, 0)}                 # 크랙: 파랑/분홍
 }
 
@@ -96,6 +102,7 @@ try:
         roi2 = frame2[ry1:ry2, rx1:rx2] # 2번 카메라
 
         # 공통 전처리 1번 카메라
+
         resized1 = cv2.resize(roi1, (416, 416)) 
         resized2 = cv2.resize(roi1, (416, 416)) 
         input_tensor1 = np.expand_dims(resized1.transpose(2, 0, 1), 0).astype(np.float32)
@@ -174,7 +181,6 @@ try:
             Defect_Chart.update_chart()
         
         frame_count += 1
-        
         if cv2.waitKey(1) == ord('q'):
             break
         
@@ -190,4 +196,6 @@ finally:
     #DefectVisualizer.visualize_defect_counts_by_date(group_by='weekly')
     # 월별 데이터
     #DefectVisualizer.visualize_defect_counts_by_date(group_by='monthly')
-    
+
+    cv2.destroyAllWindows()
+
