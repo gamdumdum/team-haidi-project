@@ -1,4 +1,5 @@
 """Demo based on ModelAPI."""
+
 # Copyright (C) 2021-2022 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -12,12 +13,8 @@ os.environ["FEATURE_FLAGS_OTX_ACTION_TASKS"] = "1"
 
 # pylint: disable=no-name-in-module, import-error
 from otx.api.usecases.exportable_code.demo.demo_package import (
-    AsyncExecutor,
-    ChainExecutor,
-    ModelContainer,
-    SyncExecutor,
-    create_visualizer,
-)
+    AsyncExecutor, ChainExecutor, ModelContainer, SyncExecutor,
+    create_visualizer)
 
 
 def build_argparser():
@@ -99,7 +96,9 @@ def get_inferencer_class(type_inference, models):
     """Return class for inference of models."""
     if len(models) > 1:
         type_inference = "chain"
-        print("You started the task chain pipeline with the provided models in the order in which they were specified")
+        print(
+            "You started the task chain pipeline with the provided models in the order in which they were specified"
+        )
     return EXECUTORS[type_inference]
 
 
@@ -119,7 +118,9 @@ def main():
     inferencer = get_inferencer_class(args.inference_type, models)
 
     # create visualizer
-    visualizer = create_visualizer(models[-1].task_type, no_show=args.no_show, output=args.output)
+    visualizer = create_visualizer(
+        models[-1].task_type, no_show=args.no_show, output=args.output
+    )
 
     if len(models) == 1:
         models = models[0]
