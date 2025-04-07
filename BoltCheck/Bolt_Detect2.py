@@ -3,58 +3,48 @@ import numpy as np
 import openvino as ov
 from pathlib import Path
 
-# Initialize OpenVINO
+
 core = ov.Core()
+# 테스트시 경로 수정 필요
+model = core.read_model("./model/crack/model.xml", weights="./model/crack/model.bin")
 
-# 볼트 모델 로드
-bolt_model = core.read_model("model/Bolt/model.xml")
-
-input_layer = bolt_model.input(0)
+input_layer = model.input(0)
 input_shape = input_layer.partial_shape
 if input_shape.is_dynamic:
     input_shape[0] = 1  # Batch size
     input_shape[1] = 3  # Channels
-    input_shape[2] = 736  # Height (모델 정보 참조)
-    input_shape[3] = 992  # Width (모델 정보 참조)
-    bolt_model.reshape({input_layer: input_shape})
+    input_shape[2] = 416  # Height (모델 정보 참조)
+    input_shape[3] = 416  # Width (모델 정보 참조)
+    model.reshape({input_layer: input_shape})
 
-bolt_compiled = core.compile_model(model=bolt_model, device_name="GPU")
-N_bolt, C_bolt, H_bolt, W_bolt = bolt_compiled.input(0).shape
+# 모델 컴파일
+compiled_model = core.compile_model(model=model, device_name="GPU")
+# Get input dimensions
+N, C, H, W = compiled_model.input(0).shape
 
-# 크랙 모델 로드 (새로운 모델 추가)
-crack_model = core.read_model("model/Crack/model.xml")  # 경로 수정 필요
-
-input_layer2 = crack_model.input(0)
-input_shape2 = input_layer2.partial_shape
-if input_shape2.is_dynamic:
-    input_shape2[0] = 1  # Batch size
-    input_shape2[1] = 3  # Channels
-    input_shape2[2] = 736  # Height (모델 정보 참조)
-    input_shape2[3] = 992  # Width (모델 정보 참조)
-    crack_model.reshape({input_layer2: input_shape2})
-
-crack_compiled = core.compile_model(model=crack_model, device_name="GPU")
-N_crack, C_crack, H_crack, W_crack = crack_compiled.input(0).shape
-
-def process_output(boxes_output, labels_output, frame_shape, model_input_size):
+def process_output(boxes_output, labels_output, frame_shape):
     boxes = []
     h, w = frame_shape[:2]
-    W_model, H_model = model_input_size  # 모델 입력 크기 (width, height)
 
     for i in range(boxes_output.shape[1]):
         conf = boxes_output[0, i, 4]
         if conf > 0.4:
-            # 좌표 클리핑 및 스케일링
-            x1 = max(0, min(boxes_output[0, i, 0], W_model-1))
-            y1 = max(0, min(boxes_output[0, i, 1], H_model-1))
-            x2 = max(0, min(boxes_output[0, i, 2], W_model-1))
-            y2 = max(0, min(boxes_output[0, i, 3], H_model-1))
+            # 1. 좌표 클리핑 (모델 입력 크기 내로 제한)
+            x1 = max(0, min(boxes_output[0, i, 0], W-1))
+            y1 = max(0, min(boxes_output[0, i, 1], H-1))
+            x2 = max(0, min(boxes_output[0, i, 2], W-1))
+            y2 = max(0, min(boxes_output[0, i, 3], H-1))
             
-            x1 = int(x1 * (w / W_model))
-            x2 = int(x2 * (w / W_model))
-            y1 = int(y1 * (h / H_model))
-            y2 = int(y2 * (h / H_model))
+            # 2. 비율 계산 (원본 프레임에 맞게 스케일링)
+            x_scale = w / W
+            y_scale = h / H
             
+            x1 = int(x1 * x_scale)
+            x2 = int(x2 * x_scale)
+            y1 = int(y1 * y_scale)
+            y2 = int(y2 * y_scale)
+            
+            # 3. 최종 클리핑 (원본 프레임 경계 확인)
             x1, x2 = max(0, min(x1, w-1)), max(0, min(x2, w-1))
             y1, y2 = max(0, min(y1, h-1)), max(0, min(y2, h-1))
             
@@ -63,21 +53,15 @@ def process_output(boxes_output, labels_output, frame_shape, model_input_size):
     
     return boxes
 
+
 # 카메라 설정
 cap = cv2.VideoCapture(4)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
-# 라벨 및 색상 설정
-LABEL_NAMES = {
-    "bolt": {0: "Bolt_OK", 1: "Bolt_NG"},
-    "crack": {0: "CASE", 1: "Crack"}
-}
-
-COLORS = {
-    "bolt": {0: (0, 255, 0), 1: (0, 0, 255)},  # 볼트: 녹색/빨강
-    "crack": {0: (255, 255, 0), 1: (255, 0, 255)}  # 크랙: 노랑/분홍
-}
+# 라벨 매핑 (model_info에서 확인) 
+LABEL_NAMES = {0: "CRACK"}
+COLORS = {0: (0, 255, 0)}
 
 try:
     while True:
@@ -85,46 +69,46 @@ try:
         if not ret:
             break
 
-        # 공통 전처리
-        resized = cv2.resize(frame, (992, 736))
+        # Define the ROI coordinates
+        x1, y1, x2, y2 = 560, 390, 720, 540
+
+        # Crop the frame to the ROI
+        roi = frame[y1:y2, x1:x2]
+
+        # Preprocess the ROI: Resize and change dimensions (HWC → CHW)
+        resized = cv2.resize(roi, (416, 416))  # width, height order
         input_tensor = np.expand_dims(resized.transpose(2, 0, 1), 0).astype(np.float32)
 
-        # 볼트 검출
-        bolt_output = bolt_compiled([input_tensor])
-        bolt_boxes = process_output(bolt_output["boxes"], bolt_output["labels"], frame.shape, (W_bolt, H_bolt))
+        # Perform inference on the cropped ROI
+        raw_output = compiled_model([input_tensor])
+        boxes_output = raw_output["boxes"]  # or raw_output[compiled_model.output(0)]
+        labels_output = raw_output["labels"]  # or raw_output[compiled_model.output(1)]
 
-        # 크랙 검출
-        crack_output = crack_compiled([input_tensor])
-        crack_boxes = process_output(crack_output["boxes"], crack_output["labels"], frame.shape, (W_crack, H_crack))
+        # Process the output and scale back to the ROI coordinates
+        boxes = process_output(boxes_output, labels_output, roi.shape)
 
-        # 결과 시각화
-        bolt_count = crack_count = 0
-        
-        # 볼트 박스 그리기
-        for box in bolt_boxes:
-            x1, y1, x2, y2, conf, label = box
-            color = COLORS["bolt"].get(label, (0, 255, 255))
-            cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
-            cv2.putText(frame, f"{LABEL_NAMES['bolt'][label]} {conf:.2f}", 
-                       (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-            if label == 0: bolt_count += 1
+        # Draw the green rectangle for the ROI on the original frame
+        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
-        # 크랙 박스 그리기
-        for box in crack_boxes:
-            x1, y1, x2, y2, conf, label = box
-            color = COLORS["crack"].get(label, (0, 255, 255))
-            cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
-            cv2.putText(frame, f"{LABEL_NAMES['crack'][label]} {conf:.2f}", 
-                       (x1, y1-30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
-            if label == 0: crack_count += 1
+        # Draw detection results within the ROI
+        for box in boxes:
+            bx1, by1, bx2, by2, conf, class_id = box
 
-        # 카운트 표시
-        cv2.putText(frame, f"Bolts: {bolt_count}", (10, 30), 
-                   cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-        cv2.putText(frame, f"Crack: {crack_count}", (10, 70), 
-                   cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 0), 2)
+            # Adjust coordinates to the original frame
+            bx1 += x1
+            bx2 += x1
+            by1 += y1
+            by2 += y1
 
-        cv2.imshow("Multi Detection", frame)
+            color = COLORS.get(class_id, (0, 255, 255))  # Default: cyan
+            label_name = LABEL_NAMES.get(class_id, f"Class {class_id}")
+            cv2.rectangle(frame, (bx1, by1), (bx2, by2), color, 2)
+            cv2.putText(frame, f"{label_name} {conf:.2f}", (bx1, by1 - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+
+        # Display the frame with detections
+        cv2.imshow("Bolt Detection", frame)
+
         if cv2.waitKey(1) == ord('q'):
             break
 
