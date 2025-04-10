@@ -1,0 +1,83 @@
+{
+    "type_of_model": "AnomalyDetection",
+    "converter_type": "ANOMALY_DETECTION",
+    "model_parameters": {
+        "labels": {
+            "label_tree": {
+                "type": "tree",
+                "directed": true,
+                "nodes": [],
+                "edges": []
+            },
+            "label_groups": [
+                {
+                    "_id": "67edfcbaffc6ab5d026fe617",
+                    "name": "labels",
+                    "label_ids": [
+                        "0",
+                        "1"
+                    ],
+                    "relation_type": "EXCLUSIVE"
+                }
+            ],
+            "all_labels": {
+                "0": {
+                    "_id": "0",
+                    "name": "Normal",
+                    "color": {
+                        "red": 4,
+                        "green": 163,
+                        "blue": 215,
+                        "alpha": 255
+                    },
+                    "hotkey": "",
+                    "domain": "ANOMALY_DETECTION",
+                    "creation_date": "2025-04-03T03:12:58.859000",
+                    "is_empty": false,
+                    "is_anomalous": false
+                },
+                "1": {
+                    "_id": "1",
+                    "name": "Anomalous",
+                    "color": {
+                        "red": 68,
+                        "green": 167,
+                        "blue": 95,
+                        "alpha": 255
+                    },
+                    "hotkey": "",
+                    "domain": "ANOMALY_DETECTION",
+                    "creation_date": "2025-04-03T03:12:58.859000",
+                    "is_empty": false,
+                    "is_anomalous": true
+                }
+            }
+        },
+        "image_threshold": 0.10546903312206268,
+        "pixel_threshold": 0.10546903312206268,
+        "image_shape": [
+            256,
+            256
+        ],
+        "task": "detection",
+        "orig_height": 256,
+        "orig_width": 256,
+        "mean_values": [
+            123.675,
+            116.28,
+            103.53
+        ],
+        "scale_values": [
+            58.395,
+            57.120000000000005,
+            57.375
+        ],
+        "normalization_scale": 0.4091834828723222,
+        "reverse_input_channels": true,
+        "model_type": "AnomalyDetection",
+        "modelapi_labels": [
+            "Normal",
+            "Anomaly"
+        ]
+    }
+}
