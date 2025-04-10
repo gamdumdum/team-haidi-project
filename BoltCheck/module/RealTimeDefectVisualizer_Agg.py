@@ -1,9 +1,3 @@
-# 실시간 결함 결과 그래프 표시
-# 작성일 : 2025. 04. 08 화요일  작성자 : 윤태검
-
-# 수정일 : 2025. 04. 10 목요일
-# 수정 내용 : 화면 및 그래프 화면 위치 설정 및 크기 조절
-
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('TkAgg')  # Tkinter 백엔드 사용
@@ -14,16 +8,6 @@ class RealTimeDefectVisualizer:
     def __init__(self):
         plt.ion()  # 대화형 모드 활성화
         self.fig, self.ax = plt.subplots(figsize=(10, 5))
-
-        # 창 위치와 크기 설정
-        mng = plt.get_current_fig_manager()
-        
-        # TkAgg 백엔드 사용 시 (가장 일반적인 방법)
-        try:
-            mng.window.geometry("1280x720+10+800")  # width x height + xpos + ypos
-        except:
-            pass
-
         self.today = dt.datetime.now().date()
         # 창 제목 설정 (최신 Matplotlib 호환 방식)
         try:

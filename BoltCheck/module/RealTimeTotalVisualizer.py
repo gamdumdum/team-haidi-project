@@ -1,4 +1,4 @@
-# 실시간 결함 결과 그래프 표시
+# 실시간 불량률 그래프 표시
 # 작성일 : 2025. 04. 08 화요일  작성자 : 윤태검
 
 # 수정일 : 2025. 04. 10 목요일
@@ -10,7 +10,7 @@ matplotlib.use('TkAgg')  # Tkinter 백엔드 사용
 import sqlite3
 import datetime as dt
 
-class RealTimeDefectVisualizer:
+class RealTimeTotalVisualizer:
     def __init__(self):
         plt.ion()  # 대화형 모드 활성화
         self.fig, self.ax = plt.subplots(figsize=(10, 5))
@@ -20,20 +20,20 @@ class RealTimeDefectVisualizer:
         
         # TkAgg 백엔드 사용 시 (가장 일반적인 방법)
         try:
-            mng.window.geometry("1280x720+10+800")  # width x height + xpos + ypos
+            mng.window.geometry("1280x720+1360+800")  # width x height + xpos + ypos
         except:
             pass
 
         self.today = dt.datetime.now().date()
         # 창 제목 설정 (최신 Matplotlib 호환 방식)
         try:
-            title = f"결함 모니터 - {self.today.strftime('%Y-%m-%d')}"
+            title = f"불량률 모니터 - {self.today.strftime('%Y-%m-%d')}"
             self.fig.canvas.manager.window.title(title)
         except AttributeError:
             try:
-                self.fig.canvas.set_window_title('Real-time Defect Monitor')
+                self.fig.canvas.set_window_title('Real-time Total Monitor')
             except:
-                self.fig.suptitle('Real-time Defect Monitor')  # 최후의 수단
+                self.fig.suptitle('Real-time Total Monitor')  # 최후의 수단
         
     def update_chart(self):
         try:
@@ -41,10 +41,10 @@ class RealTimeDefectVisualizer:
             cursor = conn.cursor()
 
             query = '''
-            SELECT Defect, COUNT(*) 
-            FROM defectsDB 
+            SELECT NAME, COUNT(*) 
+            FROM goodsDB 
             WHERE DefectDate = ? 
-            GROUP BY Defect
+            GROUP BY NAME
             ORDER BY COUNT(*) DESC
             '''
             cursor.execute(query, (self.today.strftime("%Y-%m-%d"),))
@@ -57,10 +57,10 @@ class RealTimeDefectVisualizer:
                 counts = [r[1] for r in results]
                 
                 # 색상 리스트 정의 (결함 타입 개수에 맞게 조정 가능)
-                colors = ['#2ca02c', '#d62728', '#9467bd', '#9C27B0']
+                colors = ['#1f77b4', '#ff7f0e', '#4CAF50']
                 bars = self.ax.bar(defect_types, counts, color=colors)
-                self.ax.set_title('Real-time Defect Count')
-                self.ax.set_xlabel('Defect Type')
+                self.ax.set_title('Real-time Total Count')
+                self.ax.set_xlabel('Type')
                 self.ax.set_ylabel('Count')
                 
                 for bar in bars:
