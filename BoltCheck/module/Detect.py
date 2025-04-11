@@ -15,11 +15,11 @@ class DetectGood:
         
         # 분류
         if take_Status == 0 :
-            name = '양품'
+            name = 'Good'
             sign = 2
 
         else :
-            name = '불량'
+            name = 'Bad'
             sign = 3
 
         # SQLite3 데이터베이스에 저장

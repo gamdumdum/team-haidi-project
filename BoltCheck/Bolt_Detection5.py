@@ -29,7 +29,7 @@ try:
     take_BoltPic = 0
     take_CrackPic = 0
     take_Status = 0
-    sign = 0    # 대기상태
+    sign = 1    # 대기상태
 
     # mc.batchwrite_bitunits(headdevice="M100", values=[0])
 
@@ -196,7 +196,7 @@ finally:
     Defect_Total.close()
     cv2.destroyAllWindows()
     # 일자 데이터 시각화
-    Defect_Visual.visualize_defect_counts_by_date("2025-04-01", "2025-04-10") 
+    Defect_Visual.visualize_defect_counts_by_date("2025-04-01", "2025-04-11") 
     # 주별 데이터
     #DefectVisualizer.visualize_defect_counts_by_date(group_by='weekly')
     # 월별 데이터
