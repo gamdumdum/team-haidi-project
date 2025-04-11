@@ -25,7 +25,7 @@ import pymcprotocol
 core = ov.Core()
 
 # 볼트 모델 로드 [ 경로 확인 ]
-bolt_model = core.read_model("model/Bolt/model.xml", weights="model/Bolt/model.bin")
+bolt_model = core.read_model("BoltCheck/model/Bolt/model.xml", weights="BoltCheck/model/Bolt/model.bin")
 
 input_layer = bolt_model.input(0)
 input_shape = input_layer.partial_shape
@@ -40,7 +40,7 @@ bolt_compiled = core.compile_model(model=bolt_model, device_name="GPU.1") # 외�
 N_bolt, C_bolt, H_bolt, W_bolt = bolt_compiled.input(0).shape
 
 # 크랙 모델 로드 [ 경로 확인 ]
-crack_model = core.read_model("model/crack/model01.xml", weights="model/crack/model01.bin") 
+crack_model = core.read_model("BoltCheck/model/crack/model01.xml", weights="BoltCheck/model/crack/model01.bin") 
 
 input_layer2 = crack_model.input(0)
 input_shape2 = input_layer2.partial_shape

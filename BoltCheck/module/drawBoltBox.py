@@ -4,7 +4,7 @@
 # 수정일 : 2025. 04. 08 화요일 
 # 수정 내용 : 나사 채결 결과 SQL 저장
 
-from util import *
+from .moduleUtil import *
 
 class drawBoltBox:
             
@@ -36,7 +36,7 @@ class drawBoltBox:
             # 크랙 레벨
             bolt_level = 1
 
-            if conf > 0.8 and (label == 0 or label == 1): # 신뢰도 0.8 이상
+            if conf > 0.7 and (label == 0 or label == 1): # 신뢰도 0.8 이상
                 # 'c' 키를 누르면 현재 프레임을 이미지로 저장
                 #if cv2.waitKey(1)  == ord('c'):
                 # 클래스별 폴더 경로 생성 

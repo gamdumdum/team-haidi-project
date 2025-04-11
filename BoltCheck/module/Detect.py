@@ -1,7 +1,7 @@
 # 양품 처리 함수
 # 작성일 : 2025. 04. 10 목요일    작성자 : 윤태검
 
-from util import *
+from .moduleUtil import *
 
 class DetectGood:
             
