@@ -55,7 +55,6 @@ class drawCrackBox:
                         (x1, y1-80), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
 
             if conf > 0.7: # 신뢰도 0.8 이상
-
                 # 'c' 키를 누르면 현재 프레임을 이미지로 저장
                 #if cv2.waitKey(1)  == ord('c'):
                 # 클래스별 폴더 경로 생성 
